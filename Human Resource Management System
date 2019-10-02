@@ -1,4 +1,3 @@
-
 USE MASTER
 Go
 
@@ -97,33 +96,37 @@ GO
 SELECT * FROM SGHR.Departments 
 GO
 
+INSERT INTO SGHR.Departments  Values ('ICT','TECHNOLOGY','ICT')
+Go
 
 CREATE TABLE SGHR.Employees
 (
-EmpID int primary key identity,
+EmpID int primary key identity(100,1) ,
 EmpFirstName varchar(20) not null,
 EmpLastName varchar(20) not null,
-Gender varchar(10) not null,
-MaritalStatus varchar(15) not null,
-CellPhone char(15) not null CHECK ((CellPhone like '[0][1][0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]' or CellPhone like '018%')),
-DOB date not null, 
-Age as datediff(year,dob,getdate()),
-Email nvarchar(30) null,
+Gender varchar(10)  null,
+MaritalStatus varchar(15)  null,
+CellPhone varchar(15) null CHECK ((CellPhone like '[0][1][0-9][0-9][0-9] [0-9][0-9][0-9] [0-9][0-9][0-9]' or CellPhone like '018%')),
+DOB datetime not null, 
+Email varchar(30) null,
 BloodGroup varchar (10) null, 
 Address varchar(30) NOT NULL CONSTRAINT CN_CustomerAddress  DEFAULT ('UNKNOWN'),
-JoiningDate date not null,
-TerminationDate date null,
-Image varbinary (max) null,
+JoiningDate datetime not null,
+TerminationDate datetime null,
+EmImage varbinary (max) null,
 DeptID int FOREIGN KEY REFERENCES SGHR.Departments(DeptID) ON DELETE CASCADE,
-ManagerEmpID int FOREIGN KEY REFERENCES SGHR.Employees(EmpID),
 DesignationId int FOREIGN KEY REFERENCES SGHR.HrDesignation(DegID) ON DELETE CASCADE,
 IsActive bit
 )
 Go
 
+--INSERT INTO SGHR.Employees  Values ('Sumon','Ahmed','Male','Single','01811275653',1/1/2010,'sumon@gmail.com','A+','Ctg','1/1/2017','1/1/2018','@C:\Users\SH SOHEL\Pictures\Screenshots\pci.png',200,1,10,1)
+--Go
 
 SELECT * FROM SGHR.Employees 
 GO
+
+
 
 
 CREATE TABLE  SGHR.Emp_DailyAttendence
@@ -194,108 +197,7 @@ GO
 
 
 
-----Store Procedure for Multit Table----
---create proc sp_InserUpdateDelete
---(
---@degid int,
---@degname varchar(20),
---@tablename varchar(20),
---@operaton varchar (20)
---)
-
---AS
-
---BEGIN
-
---	IF (@tablename='SGHR.HrDesignation' AND @operaton='INSERT')
---		BEGIN 
---		INSERT INTO SGHR.HrDesignation Values (@degname)
---		Print 'Inser Succesfully'
---		END
-	
-
---	IF (@tablename='SGHR.HrDesignation' AND @operaton='UPDATE')
---		BEGIN 
---		Update SGHR.HrDesignation SET DegName=@degname Where DegID=@degid
---		Print 'Updated Succesfully'
---		END
-
---	IF (@tablename='SGHR.HrDesignation' AND @operaton='DELETE')
---		BEGIN 
---		DELETE FROM  SGHR.HrDesignation Where DegID=@degid
---		Print 'DELETED Succesfully'
---		END
-
---	ELSE 
---	Print 'Something Gone Wrong'
---END
-
---Go
-
---ExEC sp_InserUpdateDelete 10, 'Offcier', 'SGHR.HrDesignation', 'INSERT'
---GO
----Second Step of SP----
-
-
---create proc sp_InserUpdateDelete2
---(
---@degid int,
---@degname varchar(20),
---@tablename varchar(20),
---@operaton varchar (20)
---)
-
---AS
-
---BEGIN
---	BEGIN TRY
---	IF (@tablename='SGHR.HrDesignation' AND @operaton='INSERT')
---		BEGIN TRAN
---		INSERT INTO SGHR.HrDesignation Values (@degname)
---		Print 'Inser Succesfully'
---		COMMIT TRAN
---	END TRY
---	BEGIN Catch 
---		RollBack TRAN 
---		Print 'Your DATA not INSERTED'
---	END CAtch
-
---	BEGIN TRY
---	IF (@tablename='SGHR.HrDesignation' AND @operaton='UPDATE')
---		BEGIN TRAN
---		Update SGHR.HrDesignation SET DegName=@degname Where DegID=@degid
---		Print 'Updated Succesfully'
---		COMMIT TRAN
---	END TRY
---	BEGIN Catch 
---		RollBack TRAN 
---		Print 'Your DATA not UPDATED!!!'
---	END CAtch
-
-
---	BEGIN TRY
---	IF (@tablename='SGHR.HrDesignation' AND @operaton='DELETE')
---		BEGIN TRAN
---		DELETE FROM  SGHR.HrDesignation Where DegID=@degid
---		Print 'DELETED Succesfully'
---		COMMIT TRAN
---	END TRY 
---	BEGIN Catch 
---		RollBack TRAN 
---		Print 'Your DATA not DELETED'
---	END CAtch
---END
-
---GO
-
-
---Select * FROM SGHR.HrDesignation
---GO
-
---EXEC sp_InserUpdateDelete 210, 'TUMI', 'SGHR.HrDesignation','INSERT'
---go
-
--------for a table---
+-------for Department Table table---
 Create proc sp_AllDepartments
 (
 @deptid int,
@@ -342,16 +244,61 @@ BEGIN
 END
 
 --Drop Proc sp_AllDepartments
+Go
 
--------
+-------for Employee Table table---
+Create proc sp_AllCRUDEmployee
+(
+@empid int,
+@empfirstname varchar(20),
+@emplastname varchar(20),
+@gender varchar(10),
+@maritalstatus varchar(15) ,
+@cellphone varchar(15),
+@dob datetime, 
+@email varchar(30),
+@bloodgroup varchar (10) , 
+@address varchar(30),
+@joiningdate datetime ,
+@terminationdate datetime ,
+@emimage varbinary (max) ,
+@deptid int,
+@designationid int,
+@isactive bit,
+@operation varchar(20)
+)
+AS 
+BEGIN
+	BEGIN TRY
+	BEGIN TRAN 
+		IF(@operation = 'INSERT')
+		
+			INSERT into SGHR.Employees values 
+			(@empfirstname,@emplastname,@gender,@maritalstatus,@cellphone,@dob,
+			@email,@bloodgroup,@address,@joiningdate,@terminationdate,@emimage,@deptid,@designationid,@isactive)
+			Print 'Your data inserted Successfully'
+		
+
+	
+		 IF(@operation = 'UPDATE')
+		
+			UPDATE SGHR.Employees set EmpFirstName= @empfirstname, EmpLastName= @emplastname,Gender= @gender,MaritalStatus= @maritalstatus,CellPhone= @cellphone,DOB= @dob,
+			Email= @email, BloodGroup= @bloodgroup, Address=@address, JoiningDate= @joiningdate,TerminationDate=@terminationdate, EmImage= @emimage, DeptID= @deptid, DesignationId= @designationid, IsActive= @isactive
+			Where EmpID=@empid
+			Print 'Your data UPDATED Successfully'
 
 
 
----------------
---Image varbinary (max) null
-
-------
---INSERT INTO Employee VALUES ('Noyan','3543564',
---(SELECT * FROM OPENROWSET (BULK N'C:\Users\SH SOHEL\Pictures\Screenshots\pci.png',SINGLE_BLOB) AS PIC))
---go
------------------
+		IF(@operation = 'DELETE')
+		
+			DELETE FROM SGHR.Employees
+			Where EmpID=@empid
+			Print 'Your data DELETED Successfully'
+		
+		COMMIT TRAN
+	END TRY
+	BEGIN Catch 
+		RollBack TRAN 
+		Print 'Somethong Wrong'
+	END CAtch
+END
